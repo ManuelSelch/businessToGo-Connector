@@ -58,7 +58,12 @@ class ActionContractTests(unittest.TestCase):
             4: {"id": 4, "name": "Orphan", "children": []},
             "root": {"children": [1]},
         }
+        for key, node in tree.items():
+            if key != "root":
+                node.update(xmlid=f"example.menu_{key}", web_icon_data="aWNvbg==" if key == 1 else False)
         menus = contract.menu_descriptors(tree, {2})
+        self.assertEqual(menus[0]["xmlid"], "example.menu_1")
+        self.assertEqual(menus[0]["web_icon_data"], "aWNvbg==")
         self.assertEqual([m["id"] for m in menus], [1, 2])
         self.assertEqual(menus[0]["children"], [2])
         self.assertEqual(menus[1]["parent_id"], 1)
@@ -73,6 +78,9 @@ class ActionContractTests(unittest.TestCase):
     def test_does_not_mutate_odoo_cached_menu_tree(self):
         tree = {"root": {"children": [1]}, 1: {"id": 1, "name": "App", "children": [2]},
                 2: {"id": 2, "name": "Contacts", "children": []}}
+        for key, node in tree.items():
+            if key != "root":
+                node.update(xmlid=f"example.menu_{key}", web_icon_data=False)
         result = contract.menu_descriptors(tree, {2})
         result[0]["children"].clear()
         self.assertEqual(tree[1]["children"], [2])

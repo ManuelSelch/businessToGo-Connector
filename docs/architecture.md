@@ -54,6 +54,7 @@ permissions and is not a restriction on standard APIs users already have.
 - Action domain/context expressions are returned unchanged; they are not
   evaluated or rewritten by the connector. A client must interpret the
   supported expressions correctly or explicitly reject them.
+- API v2 menu descriptors include the stable XML identity (when available) and Odoo's Base64 menu icon (or false), so clients can build accessible root-menu grids without installed-addon queries.
 - IDs are database-local. Preserve returned action view order and explicit
   view IDs when calling `get_views`.
 - Responses are computed per caller; the connector maintains no shared

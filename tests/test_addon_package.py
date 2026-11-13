@@ -14,7 +14,7 @@ class AddonPackageTests(unittest.TestCase):
         self.manifest = ast.literal_eval((ADDON / "__manifest__.py").read_text())
 
     def test_manifest_targets_odoo_19_without_automatic_installation(self):
-        self.assertEqual(self.manifest["version"], "19.0.1.0.0")
+        self.assertEqual(self.manifest["version"], "19.0.1.1.0")
         self.assertEqual(self.manifest["depends"], ["base", "web"])
         self.assertTrue(self.manifest["installable"])
         self.assertFalse(self.manifest["auto_install"])

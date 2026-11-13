@@ -74,6 +74,9 @@ class ConnectorBoundaryTests(unittest.TestCase):
             99: {"id": 99, "name": "Unreachable", "children": [],
                  "action_model": "ir.actions.act_window", "action_id": 100},
         }
+        for key, node in self.tree.items():
+            if key != "root":
+                node.update(xmlid=f"example.menu_{key}", web_icon_data=False)
         self.menu_model.load_menus.return_value = self.tree
         self.menu_model._visible_menu_ids.return_value = {1, 2}
 
@@ -92,7 +95,7 @@ class ConnectorBoundaryTests(unittest.TestCase):
             self.api.capabilities()
 
     def test_capabilities_are_explicit_and_do_not_read_metadata(self):
-        self.assertEqual(self.api.capabilities()["api_version"], 1)
+        self.assertEqual(self.api.capabilities()["api_version"], 2)
         self.action_model.browse.assert_not_called()
 
     def test_discovery_uses_non_debug_visible_tree_and_checks_model_without_sudo(self):

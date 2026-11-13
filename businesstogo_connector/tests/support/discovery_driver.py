@@ -51,7 +51,7 @@ class DiscoveryDriver:
 
     def shouldDescribeCapabilities(self):
         result = self.api.capabilities()
-        self.case.assertEqual(result["api_version"], 1)
+        self.case.assertEqual(result["api_version"], 2)
         self.case.assertIn("window_action_resolution", result["capabilities"])
 
     def shouldBeOrdinaryUser(self):

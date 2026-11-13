@@ -1,7 +1,7 @@
 {
     "name": "businessToGo Connector",
     "summary": "Access-controlled discovery for businessToGo apps",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Productivity",
     "author": "Manuel Selch",
     "website": "https://github.com/ManuelSelch/businessToGo-Connector",

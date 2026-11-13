@@ -13,8 +13,8 @@ class BusinessToGoConnector(models.AbstractModel):
     def capabilities(self):
         self._require_connector_user()
         return {
-            "api_version": 1,
-            "addon_version": "19.0.1.0.0",
+            "api_version": 2,
+            "addon_version": "19.0.1.1.0",
             "odoo_major": 19,
             "capabilities": ["menu_discovery", "window_action_resolution"],
             "action_types": ["ir.actions.act_window"],

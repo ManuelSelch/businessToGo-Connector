@@ -17,6 +17,8 @@ appears with its module entry. Installation does not assign users or change
 existing business-model permissions. To revoke connector discovery access,
 remove the user's connector group. Standard Odoo API access remains unchanged.
 
+Version 19.0.1.1.0 exposes API v2, adding required menu XML identities and icons for the native root-menu grid. Native clients requiring v2 must not use the original API v1 deployment.
+
 For upgrades, deploy the new addon files, restart Odoo and upgrade
 `businesstogo_connector`. Review security changes before each upgrade.
 

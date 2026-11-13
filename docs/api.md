@@ -1,4 +1,4 @@
-# JSON-2 API, version 1
+# JSON-2 API, version 2
 
 Use Odoo 19's standard JSON-2 authentication and database selection:
 
@@ -20,8 +20,8 @@ Response:
 
 ```json
 {
-  "api_version": 1,
-  "addon_version": "19.0.1.0.0",
+  "api_version": 2,
+  "addon_version": "19.0.1.1.0",
   "odoo_major": 19,
   "capabilities": ["menu_discovery", "window_action_resolution"],
   "action_types": ["ir.actions.act_window"]
@@ -42,8 +42,8 @@ Returns an ordered, flat array of supported action menus and their ancestors:
 
 ```json
 [
-  {"id": 134, "name": "Contacts", "parent_id": false, "children": [135], "has_action": false},
-  {"id": 135, "name": "Contacts", "parent_id": 134, "children": [], "has_action": true}
+  {"id": 134, "name": "Contacts", "xmlid": "contacts.menu_contacts", "web_icon_data": "<base64 image or false>", "parent_id": false, "children": [135], "has_action": false},
+  {"id": 135, "name": "Contacts", "xmlid": "contacts.res_partner_menu_contacts", "web_icon_data": false, "parent_id": 134, "children": [], "has_action": true}
 ]
 ```
 

@@ -45,6 +45,8 @@ def menu_descriptors(tree, allowed_action_ids):
         return [{
             "id": node_id,
             "name": node["name"],
+            "xmlid": node["xmlid"],
+            "web_icon_data": node["web_icon_data"],
             "parent_id": parent_id,
             "children": children,
             "has_action": node_id in allowed_action_ids,
