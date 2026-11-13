@@ -1,0 +1,5 @@
+suites:
+  checks:
+    command: ["python3", "scripts/check.py"]
+    timeoutSeconds: 120
+    auto: after-agent

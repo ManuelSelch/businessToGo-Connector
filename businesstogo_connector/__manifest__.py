@@ -1,0 +1,15 @@
+{
+    "name": "businessToGo Connector",
+    "summary": "Access-controlled discovery for businessToGo apps",
+    "version": "19.0.1.0.0",
+    "category": "Productivity",
+    "author": "Manuel Selch",
+    "website": "https://github.com/ManuelSelch/businessToGo-Connector",
+    "license": "LGPL-3",
+    "depends": ["base", "web"],
+    "data": ["security/connector_groups.xml"],
+    "images": ["static/description/icon.png"],
+    "installable": True,
+    "application": False,
+    "auto_install": False,
+}

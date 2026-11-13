@@ -2,29 +2,40 @@
 
 Odoo server-side integration for the businessToGo app family.
 
-- **Odoo addon display name:** businessToGo Connector
-- **Odoo addon technical name:** `businesstogo_connector`
-- **Initial target:** self-hosted Odoo 19
+The `businesstogo_connector` addon provides opt-in, access-checked menu and
+window-action discovery for ordinary internal users. Native apps remain
+responsible for view parsing and rendering.
 
-## Status
+## Requirements
 
-Repository initialized. The addon is not implemented yet.
+- Self-hosted **Odoo 19**, with the standard `base` and `web` modules.
+- Administrator access for installation and explicit user assignment.
+- Existing business-model permissions for each assigned user.
 
-## Planned first scope
+## Install
 
-- An integration group explicitly assigned to selected internal users.
-- Menu/action discovery that validates the current user's menu visibility, action restrictions and target-model access.
-- Narrow action metadata responses without granting broad read access to technical models.
-- A capability/version method for installation and feature detection.
-- Standard resolved-view and business-record requests under the current user's permissions; no elevated business-record access.
+Copy `businesstogo_connector/` into your custom addons path, restart Odoo,
+update the Apps list, remove the **Apps** filter, and install **businessToGo
+Connector**. It is a technical addon, not a separate home-screen application.
 
-The iOS app remains responsible for generic view parsing and native rendering. The connector may later own additional integration settings and permissions; it should not duplicate Odoo business logic.
+Under **Settings → Users & Companies → Users**, enable
+**businessToGo / Connector: Access** for selected internal users, then save.
+No users are assigned automatically, and no technical-model ACLs are added.
 
-## Initial acceptance checks
+The addon uses the same icon as businessToGo ERP.
 
-- An assigned ordinary internal user can navigate Contacts menu → action → resolved list/form views → a limited page of records.
-- Unassigned users cannot use connector discovery methods.
-- Inaccessible menus/actions are rejected, including requests made directly by ID.
-- No administrator rights or broad technical-model ACLs are required for ordinary users.
+## Development
 
-Installation, configuration and test instructions will be added with the implementation.
+```sh
+python3 scripts/check.py
+```
+
+This runs packaging checks, Python syntax checks and isolated tests without
+installing Odoo. Real ORM integration tests are included but require your own
+disposable Odoo test database; they are not covered by the isolated checks.
+
+- [Installation and testing](docs/installation.md)
+- [JSON-2 API](docs/api.md)
+- [Architecture and security](docs/architecture.md)
+
+License: LGPL-3.0-only; see [LICENSE](LICENSE).

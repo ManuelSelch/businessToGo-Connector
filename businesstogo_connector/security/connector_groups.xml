@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_businesstogo" model="ir.module.category">
+        <field name="name">businessToGo</field>
+        <field name="sequence">90</field>
+    </record>
+    <record id="privilege_connector" model="res.groups.privilege">
+        <field name="name">Connector</field>
+        <field name="category_id" ref="module_category_businesstogo"/>
+        <field name="sequence">10</field>
+    </record>
+    <record id="group_connector_user" model="res.groups">
+        <field name="name">Access</field>
+        <field name="privilege_id" ref="privilege_connector"/>
+        <field name="comment">Allow businessToGo menu and action discovery for selected internal users. Does not grant access to business records or technical models.</field>
+    </record>
+</odoo>
