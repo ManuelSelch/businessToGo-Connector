@@ -159,7 +159,8 @@ class BusinessToGoReceipts(models.AbstractModel):
             raise UserError("Duplicate product barcodes require Odoo.")
         return {
             "id": picking.id, "reference": picking.name, "supplier": picking.partner_id.display_name or "",
-            "source": picking.origin or "", "destination": picking.location_dest_id.display_name,
+            "source": picking.location_id.display_name if picking.picking_type_code == "internal" else picking.origin or "",
+            "destination": picking.location_dest_id.display_name,
             "lines": lines,
             "revision": revision([picking.id, picking.write_date, picking.state, picking.company_id.id,
                                   picking.picking_type_id.id, picking.location_id.id, picking.location_dest_id.id, fingerprints]),

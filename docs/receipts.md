@@ -1,6 +1,6 @@
 # Optional Inventory addon
 
-- Package: `businesstogo_inventory`, version `19.0.2.0.0`; depends on `businesstogo_connector` and `stock`. The base discovery addon remains unchanged and has no stock dependency.
+- Package: `businesstogo_inventory`, version `19.0.2.0.1`; depends on `businesstogo_connector` and `stock`. The base discovery addon remains unchanged and has no stock dependency.
 - Install only after testing on a disposable Odoo 19 database. Copy `businesstogo_inventory/` alongside the existing connector in the custom addons path, restart Odoo, refresh the Apps list, remove the Apps filter and install **businessToGo Inventory**. No new groups, ACL grants, tables or automatic user assignments are added.
 - Callers must be ordinary internal users assigned Connector Access, with their own existing stock-model access and allowed companies. There is no `sudo()` for receipt operations. Standard JSON-2 authentication and errors apply.
 
@@ -10,7 +10,7 @@
 - `POST /json/2/businesstogo.receipts/save`: `{"receipt_id":42,"expected_revision":"<snapshot revision>","quantities":[{"id":7,"quantity":2}]}` → new snapshot. Supply every active move exactly once. Saves received counts and picked flags, never demand or validation.
 - `POST /json/2/businesstogo.receipts/validate`: `{"receipt_id":42,"expected_revision":"<saved revision>"}` → `{"id":42,"state":"done"}` only after normal Odoo validation reaches Done. This call never writes received quantities.
 - Internal picking and storage transfers use `transfer` (`transfer_id`), `save_transfer` (`transfer_id`, `expected_revision`, `quantities`) and `validate_transfer` (`transfer_id`, `expected_revision`). They use the same snapshot and transactional rules, but reject non-internal transfers and require ready pickings between internal locations.
-- Snapshots contain `id`, `reference`, `supplier`, `source`, `destination`, opaque `revision`, and `lines` (`id` = stock move ID, `name`, `barcode`, integer `expected`, integer `quantity`). Unpicked reservation quantities are represented as zero received, not as confirmed counts.
+- Snapshots contain `id`, `reference`, `supplier`, `source`, `destination`, opaque `revision`, and `lines` (`id` = stock move ID, `name`, `barcode`, integer `expected`, integer `quantity`). Unpicked reservation quantities are represented as zero received, not as confirmed counts. Internal transfers expose the source location in `source`; receipts retain their originating document.
 - Only open incoming receipts in Assigned/Confirmed state and ready internal transfers between internal locations are editable. Full saved demand is required for validation. Unit products only (`uom.product_uom_unit`), untracked storable products, positive whole demand up to 1,000,000 per line, up to 200 moves, no over-receipts, duplicate nonempty barcodes, returns, scrap, multiple detailed lines, package/owner/lot details or differing detail locations. Unsupported receipts must be completed in Odoo.
 
 ## Transactions and concurrency
