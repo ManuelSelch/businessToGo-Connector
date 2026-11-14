@@ -17,9 +17,24 @@ class BusinessToGoReceipts(models.AbstractModel):
         return self._snapshot(picking)
 
     @api.model
-    def save(self, receipt_id, expected_revision, quantities):
+    def transfer(self, transfer_id):
         self = self._safe_context()
-        picking = self._locked(receipt_id)
+        picking = self._picking(transfer_id, "internal")
+        if picking.state in ("done", "cancel"):
+            return {"id": picking.id, "state": picking.state}
+        return self._snapshot(picking)
+
+    @api.model
+    def save(self, receipt_id, expected_revision, quantities):
+        return self._save(receipt_id, expected_revision, quantities, "incoming")
+
+    @api.model
+    def save_transfer(self, transfer_id, expected_revision, quantities):
+        return self._save(transfer_id, expected_revision, quantities, "internal")
+
+    def _save(self, receipt_id, expected_revision, quantities, picking_type):
+        self = self._safe_context()
+        picking = self._locked(receipt_id, picking_type)
         snapshot = self._snapshot(picking)
         self._check_revision(snapshot, expected_revision)
         try:
@@ -35,8 +50,15 @@ class BusinessToGoReceipts(models.AbstractModel):
 
     @api.model
     def validate(self, receipt_id, expected_revision):
+        return self._validate(receipt_id, expected_revision, "incoming")
+
+    @api.model
+    def validate_transfer(self, transfer_id, expected_revision):
+        return self._validate(transfer_id, expected_revision, "internal")
+
+    def _validate(self, receipt_id, expected_revision, picking_type):
         self = self._safe_context()
-        picking = self._locked(receipt_id)
+        picking = self._locked(receipt_id, picking_type)
         snapshot = self._snapshot(picking)
         self._check_revision(snapshot, expected_revision)
         if not all(line["quantity"] == line["expected"] for line in snapshot["lines"]):
@@ -56,7 +78,7 @@ class BusinessToGoReceipts(models.AbstractModel):
         return self.with_context({key: value for key, value in self.env.context.items()
                                   if key in ("lang", "tz", "allowed_company_ids")})
 
-    def _picking(self, receipt_id):
+    def _picking(self, receipt_id, picking_type="incoming"):
         self.env["businesstogo.connector"]._require_connector_user()
         try:
             positive_id(receipt_id)
@@ -66,12 +88,12 @@ class BusinessToGoReceipts(models.AbstractModel):
         if not picking:
             raise AccessError("Receipt is unavailable.")
         picking.check_access("read")
-        if picking.company_id not in self.env.companies or picking.picking_type_code != "incoming":
-            raise AccessError("Incoming receipt is unavailable.")
+        if picking.company_id not in self.env.companies or picking.picking_type_code != picking_type:
+            raise AccessError("Transfer is unavailable.")
         return picking
 
-    def _locked(self, receipt_id):
-        picking = self._picking(receipt_id)
+    def _locked(self, receipt_id, picking_type):
+        picking = self._picking(receipt_id, picking_type)
         picking.check_access("write")
         # Lock picking, then moves, then details in stable ID order. Under Odoo's
         # REPEATABLE READ a concurrent committed update causes serialization retry;
@@ -81,7 +103,7 @@ class BusinessToGoReceipts(models.AbstractModel):
         self.env.cr.execute("SELECT id FROM stock_move WHERE picking_id = %s ORDER BY id FOR UPDATE", [picking.id])
         self.env.cr.execute("SELECT id FROM stock_move_line WHERE picking_id = %s ORDER BY id FOR UPDATE", [picking.id])
         self.env.invalidate_all()
-        picking = self._picking(receipt_id)
+        picking = self._picking(receipt_id, picking_type)
         picking.check_access("write")
         picking.move_ids.check_access("write")
         picking.move_line_ids.check_access("write")
@@ -93,7 +115,11 @@ class BusinessToGoReceipts(models.AbstractModel):
 
     def _snapshot(self, picking):
         if picking.state not in ("assigned", "confirmed"):
-            raise UserError("Only open, ready or confirmed incoming receipts are supported.")
+            raise UserError("Only open, ready or confirmed transfers are supported.")
+        if picking.picking_type_code == "internal" and (
+                picking.state != "assigned" or picking.location_id.usage != "internal"
+                or picking.location_dest_id.usage != "internal"):
+            raise UserError("Only ready transfers between internal locations are supported.")
         moves = picking.move_ids.filtered(lambda move: move.state != "cancel").sorted("id")
         moves.check_access("read")
         picking.move_line_ids.check_access("read")
@@ -136,5 +162,5 @@ class BusinessToGoReceipts(models.AbstractModel):
             "source": picking.origin or "", "destination": picking.location_dest_id.display_name,
             "lines": lines,
             "revision": revision([picking.id, picking.write_date, picking.state, picking.company_id.id,
-                                  picking.location_id.id, picking.location_dest_id.id, fingerprints]),
+                                  picking.picking_type_id.id, picking.location_id.id, picking.location_dest_id.id, fingerprints]),
         }

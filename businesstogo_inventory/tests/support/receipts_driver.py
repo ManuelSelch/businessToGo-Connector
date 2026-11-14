@@ -66,6 +66,38 @@ class ReceiptsDriver:
         with self.case.assertRaises(UserError):
             self.api.receipt(self.picking.id)
 
+    def shouldScanInternalTransfer(self):
+        warehouse = self.env["stock.warehouse"].search([("company_id", "=", self.env.company.id)], limit=1)
+        location = self.env["stock.location"].create({"name": "Scanner staging", "usage": "internal",
+                                                      "location_id": warehouse.view_location_id.id})
+        self.env["stock.quant"]._update_available_quantity(self.product, warehouse.lot_stock_id, 3)
+        picking = self.env["stock.picking"].create({
+            "picking_type_id": warehouse.int_type_id.id,
+            "location_id": warehouse.lot_stock_id.id,
+            "location_dest_id": location.id,
+            "move_ids": [Command.create({"product_id": self.product.id, "product_uom_qty": 3,
+                "product_uom": self.product.uom_id.id, "location_id": warehouse.lot_stock_id.id,
+                "location_dest_id": location.id})],
+        })
+        picking.action_confirm()
+        picking.action_assign()
+        snapshot = self.api.transfer(picking.id)
+        self.case.assertEqual(snapshot["lines"][0]["quantity"], 0)
+        self.case.assertEqual(snapshot["lines"][0]["expected"], 3)
+        saved = self.api.save_transfer(picking.id, snapshot["revision"],
+            [{"id": picking.move_ids.id, "quantity": 3}])
+        self.case.assertNotEqual(picking.state, "done")
+        self.case.assertEqual(saved["lines"][0]["quantity"], 3)
+        with self.case.assertRaises(ValidationError), self.env.cr.savepoint():
+            self.api.save_transfer(picking.id, snapshot["revision"],
+                [{"id": picking.move_ids.id, "quantity": 3}])
+        self.case.assertEqual(self.api.validate_transfer(picking.id, saved["revision"]),
+                              {"id": picking.id, "state": "done"})
+
+    def shouldRejectReceiptAsInternalTransfer(self):
+        with self.case.assertRaises(AccessError), self.env.cr.savepoint():
+            self.api.transfer(self.picking.id)
+
     def shouldIgnoreValidationBypassContext(self):
         self.api = self.api.with_context(skip_sanity_check=True, skip_backorder=True,
             button_validate_picking_ids=[999999])

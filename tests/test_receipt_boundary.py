@@ -46,7 +46,8 @@ class ReceiptBoundaryTests(unittest.TestCase):
         self.picking.button_validate = self.validate
         self.api.env = types.SimpleNamespace(flush_all=lambda: None, invalidate_all=lambda: None)
         self.api._safe_context = lambda: self.api
-        self.api._locked = lambda receipt_id: self.picking
+        self.locked_types = []
+        self.api._locked = lambda receipt_id, picking_type: self.locked_types.append(picking_type) or self.picking
         self.api._snapshot = lambda picking: self.snapshot
 
     def validate(self):
@@ -59,6 +60,18 @@ class ReceiptBoundaryTests(unittest.TestCase):
         self.assertEqual(self.writes, [{"quantity": 2, "picked": True}])
         self.assertEqual(self.validations, [])
         self.assertEqual(result, self.snapshot)
+
+    def test_internal_transfer_save_is_separate_from_receipt_boundary(self):
+        self.api.save_transfer(42, "r1", [{"id": 1, "quantity": 2}])
+        self.assertEqual(self.locked_types, ["internal"])
+        self.assertEqual(self.writes, [{"quantity": 2, "picked": True}])
+        self.assertEqual(self.validations, [])
+
+    def test_internal_transfer_validate_requires_full_count(self):
+        with self.assertRaises(Rejected):
+            self.api.validate_transfer(42, "r1")
+        self.assertEqual(self.locked_types, ["internal"])
+        self.assertEqual(self.validations, [])
 
     def test_stale_revision_prevents_all_mutations(self):
         with self.assertRaises(Rejected):

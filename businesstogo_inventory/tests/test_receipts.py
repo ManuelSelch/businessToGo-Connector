@@ -31,3 +31,9 @@ class TestReceipts(TransactionCase):
 
     def test_context_cannot_bypass_validation(self):
         self.receipts.shouldIgnoreValidationBypassContext()
+
+    def test_internal_storage_and_pick_transfer(self):
+        self.receipts.shouldScanInternalTransfer()
+
+    def test_internal_endpoint_rejects_receipts(self):
+        self.receipts.shouldRejectReceiptAsInternalTransfer()
