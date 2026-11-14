@@ -34,6 +34,7 @@ This runs packaging checks, Python syntax checks and isolated tests without
 installing Odoo. Real ORM integration tests are included but require your own
 disposable Odoo test database; they are not covered by the isolated checks.
 
+- [Optional transactional Inventory addon and manual deployment](docs/receipts.md)
 - [Installation and testing](docs/installation.md)
 - [JSON-2 API](docs/api.md)
 - [Architecture and security](docs/architecture.md)

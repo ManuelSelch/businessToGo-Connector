@@ -18,6 +18,12 @@ Resolved views and business records are requested directly from standard Odoo
 methods under the user's existing permissions. The ERP app is not wired to the
 connector in this repository.
 
+## Optional Inventory slice
+
+- `businesstogo_inventory` is a separate addon depending on `stock` and the base connector; it registers `businesstogo.receipts` with snapshot, Save and Validate methods.
+- `receipts/domain/contract.py` owns pure count validation and revision hashing. `receipts/app/receipts.py` owns ORM access checks, row locks and the transactional stock API adapter.
+- The base discovery model and capabilities are unchanged; Inventory installation does not grant business permissions. [Receipt contracts and verification limits](receipts.md).
+
 ## Access flow
 
 All three public methods require both internal-user status and the dedicated
